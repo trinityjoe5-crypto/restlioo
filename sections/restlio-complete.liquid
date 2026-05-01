@@ -1,0 +1,1431 @@
+<div id="RestlioMaster">
+  
+  <style>
+    <!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Restlio — Sleep Deeper Tonight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* ── RESET & BASE ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #080c18;
+    --deep:   #0d1220;
+    --card:   #111827;
+    --gold:   #c9a96e;
+    --gold2:  #e8c98a;
+    --cream:  #f5f0e8;
+    --muted:  #8a90a0;
+    --border: rgba(201,169,110,.18);
+    --glass:  rgba(255,255,255,.04);
+    --radius: 20px;
+    --glow:   0 0 60px rgba(201,169,110,.12);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── CUSTOM CURSOR ───────────────────────────────────── */
+  .cursor {
+    position: fixed; top: 0; left: 0; z-index: 9999;
+    pointer-events: none;
+  }
+  .cursor__dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold);
+    transform: translate(-50%,-50%);
+    transition: transform .1s;
+  }
+  .cursor__ring {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px solid rgba(201,169,110,.5);
+    transform: translate(-50%,-50%);
+    transition: transform .18s ease, width .25s, height .25s, border-color .25s;
+    margin-top: -22px; margin-left: 0px;
+    position: absolute; top: 0; left: 0;
+  }
+  body:has(a:hover) .cursor__ring,
+  body:has(button:hover) .cursor__ring {
+    width: 56px; height: 56px;
+    border-color: var(--gold);
+  }
+
+  /* ── NOISE OVERLAY ───────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 1;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: .028;
+  }
+
+  /* ── STARS CANVAS ────────────────────────────────────── */
+  #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  /* ── UTILITY ─────────────────────────────────────────── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
+  .section   { padding: 120px 0; }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--gold); border: 1px solid var(--border);
+    padding: 6px 16px; border-radius: 100px;
+    margin-bottom: 24px;
+    background: rgba(201,169,110,.06);
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700; line-height: 1.2;
+    color: var(--cream);
+  }
+  h2 em { font-style: italic; color: var(--gold); }
+
+  .subtitle {
+    font-size: 18px; color: var(--muted);
+    max-width: 560px; margin: 16px 0 0;
+  }
+
+  /* FADE-IN ON SCROLL */
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+  .reveal-delay-1 { transition-delay: .1s; }
+  .reveal-delay-2 { transition-delay: .22s; }
+  .reveal-delay-3 { transition-delay: .34s; }
+  .reveal-delay-4 { transition-delay: .46s; }
+
+  /* ── HEADER ──────────────────────────────────────────── */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 20px 0;
+    transition: background .4s, backdrop-filter .4s, border-color .4s;
+  }
+  header.scrolled {
+    background: rgba(8,12,24,.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--cream);
+    letter-spacing: -.01em;
+    text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+  .header-cta {
+    font-size: 13px; font-weight: 600; letter-spacing: .06em;
+    padding: 10px 24px; border-radius: 100px;
+    background: var(--gold); color: var(--navy);
+    border: none; cursor: none;
+    transition: background .25s, transform .2s;
+    text-decoration: none;
+  }
+  .header-cta:hover { background: var(--gold2); transform: scale(1.04); }
+
+  /* ── HERO ────────────────────────────────────────────── */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    position: relative;
+    padding-top: 100px;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(201,169,110,.07) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 80% at 80% 20%, rgba(30,50,100,.4) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 100% at 20% 80%, rgba(10,20,60,.5) 0%, transparent 50%),
+      linear-gradient(180deg, var(--navy) 0%, #050810 100%);
+  }
+
+  .hero-moon {
+    position: absolute; right: 8%; top: 15%;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #1a2540, #080c18 70%);
+    box-shadow:
+      0 0 0 1px rgba(201,169,110,.08),
+      0 0 80px rgba(201,169,110,.06),
+      inset 0 0 60px rgba(201,169,110,.04);
+    animation: moonFloat 8s ease-in-out infinite;
+    z-index: 1;
+  }
+  .hero-moon::after {
+    content: '';
+    position: absolute; top: 12%; left: 18%;
+    width: 36%; height: 36%; border-radius: 50%;
+    background: rgba(201,169,110,.05);
+    filter: blur(20px);
+  }
+  @keyframes moonFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%       { transform: translateY(-20px) rotate(2deg); }
+  }
+
+  .hero-content { position: relative; z-index: 2; max-width: 680px; }
+
+  .hero-eyebrow {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 28px;
+  }
+  .hero-line { width: 40px; height: 1px; background: var(--gold); opacity: .6; }
+  .hero-eyebrow-text {
+    font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .hero-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 900; line-height: 1.05;
+    color: var(--cream);
+    margin-bottom: 24px;
+  }
+  .hero-headline em {
+    font-style: italic; color: var(--gold);
+    display: block;
+  }
+
+  .hero-sub {
+    font-size: 19px; color: var(--muted); line-height: 1.65;
+    max-width: 520px; margin-bottom: 44px;
+  }
+  .hero-sub strong { color: var(--cream); font-weight: 500; }
+
+  .hero-actions { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 600; letter-spacing: .04em;
+    padding: 18px 36px; border-radius: 100px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+    color: var(--navy); border: none; cursor: none;
+    transition: transform .25s, box-shadow .25s;
+    box-shadow: 0 8px 40px rgba(201,169,110,.3);
+    text-decoration: none;
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 16px 60px rgba(201,169,110,.4);
+  }
+  .btn-primary svg { transition: transform .25s; }
+  .btn-primary:hover svg { transform: translateX(4px); }
+
+  .btn-ghost {
+    font-size: 14px; color: var(--muted); cursor: none;
+    text-decoration: none; display: flex; align-items: center; gap: 6px;
+    transition: color .2s;
+    background: none; border: none;
+  }
+  .btn-ghost:hover { color: var(--cream); }
+
+  .hero-trust {
+    display: flex; align-items: center; gap: 20px;
+    margin-top: 56px; padding-top: 40px;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+  .hero-trust-avatars { display: flex; }
+  .hero-trust-avatars .av {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 2px solid var(--navy);
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    margin-left: -10px;
+  }
+  .hero-trust-avatars .av:first-child { margin-left: 0; }
+  .av-1 { background: linear-gradient(135deg,#667eea,#764ba2); }
+  .av-2 { background: linear-gradient(135deg,#f093fb,#f5576c); }
+  .av-3 { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+  .av-4 { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+  .av-5 { background: linear-gradient(135deg,#fa709a,#fee140); }
+
+  .hero-trust-text { font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .hero-trust-text strong { color: var(--cream); display: block; font-size: 14px; }
+
+  /* WAVE ── scrolling decoration */
+  .wave-divider {
+    width: 100%; overflow: hidden;
+    position: relative; z-index: 2;
+    margin-top: -2px;
+  }
+  .wave-divider svg { display: block; }
+
+  /* ── SOCIAL PROOF BAR ────────────────────────────────── */
+  .proof-bar {
+    background: rgba(201,169,110,.06);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0;
+    position: relative; z-index: 2;
+  }
+  .proof-bar-inner {
+    display: flex; align-items: center; justify-content: center;
+    gap: 48px; flex-wrap: wrap;
+  }
+  .proof-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 500; color: var(--muted);
+  }
+  .proof-item strong { color: var(--cream); }
+  .proof-icon { font-size: 18px; }
+
+  /* ── PROBLEM ─────────────────────────────────────────── */
+  #problem { position: relative; z-index: 2; }
+
+  .problem-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2px; margin-top: 64px;
+    border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .problem-card {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    padding: 44px 36px;
+    position: relative; overflow: hidden;
+    transition: background .3s;
+  }
+  .problem-card:hover { background: rgba(255,255,255,.065); }
+  .problem-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,169,110,.3), transparent);
+  }
+
+  .problem-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem; font-weight: 900;
+    color: rgba(201,169,110,.1);
+    line-height: 1; margin-bottom: 12px;
+    display: block;
+  }
+
+  .problem-icon {
+    font-size: 2.4rem; margin-bottom: 16px; display: block;
+    filter: grayscale(20%);
+  }
+
+  .problem-title {
+    font-size: 1.2rem; font-weight: 600; color: var(--cream);
+    margin-bottom: 10px;
+    font-family: 'Playfair Display', serif;
+  }
+  .problem-desc { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+  .problem-cta-line {
+    text-align: center; margin-top: 64px;
+    font-size: 18px; color: var(--muted);
+  }
+  .problem-cta-line strong {
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+  }
+
+  /* ── SOLUTION ────────────────────────────────────────── */
+  #solution {
+    position: relative; z-index: 2;
+    background: linear-gradient(180deg, transparent 0%, rgba(201,169,110,.03) 50%, transparent 100%);
+  }
+
+  .solution-layout {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center;
+    margin-top: 64px;
+  }
+  @media(max-width:768px){ .solution-layout { grid-template-columns: 1fr; gap: 48px; } }
+
+  /* CSS PILLOW */
+  .pillow-stage {
+    display: flex; align-items: center; justify-content: center;
+    position: relative; min-height: 420px;
+  }
+  .pillow-glow {
+    position: absolute; inset: -40px;
+    background: radial-gradient(ellipse at center, rgba(201,169,110,.08) 0%, transparent 70%);
+    animation: glowPulse 4s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%,100% { opacity: .5; transform: scale(1); }
+    50%      { opacity: 1; transform: scale(1.06); }
+  }
+  .pillow {
+    position: relative; z-index: 1;
+    width: 280px; height: 200px;
+    border-radius: 50px;
+    background: linear-gradient(145deg, #1e2d4a 0%, #152035 40%, #0e1828 100%);
+    box-shadow:
+      0 40px 100px rgba(0,0,0,.6),
+      0 0 0 1px rgba(201,169,110,.15),
+      inset 0 1px 0 rgba(255,255,255,.08),
+      inset 0 -2px 10px rgba(0,0,0,.3);
+    animation: pillowFloat 6s ease-in-out infinite;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @keyframes pillowFloat {
+    0%,100% { transform: translateY(0) rotate(-1deg); }
+    50%      { transform: translateY(-16px) rotate(1deg); }
+  }
+  .pillow::before {
+    content: '';
+    position: absolute; inset: 12px;
+    border-radius: 40px;
+    border: 1px solid rgba(201,169,110,.12);
+  }
+  .pillow::after {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 60%; height: 60%;
+    border-radius: 30px;
+    background: linear-gradient(135deg, rgba(201,169,110,.06), transparent);
+  }
+  .pillow-label {
+    position: absolute; z-index: 2;
+    font-family: 'Playfair Display', serif;
+    font-size: .85rem; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--gold); opacity: .7;
+  }
+  .pillow-badge {
+    position: absolute; top: -20px; right: -20px; z-index: 3;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--navy);
+    box-shadow: 0 8px 30px rgba(201,169,110,.4);
+    animation: badgeSpin 20s linear infinite;
+  }
+  @keyframes badgeSpin { to { transform: rotate(360deg); } }
+  .pillow-badge span { animation: badgeSpin 20s linear infinite reverse; }
+
+  .pillow-tags {
+    position: absolute;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .pillow-tags.left  { left: -120px; }
+  .pillow-tags.right { right: -120px; text-align: right; }
+  .ptag {
+    font-size: 12px; font-weight: 500; color: var(--muted);
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .ptag .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+
+  @media(max-width:900px) { .pillow-tags { display: none; } }
+
+  .solution-points { display: flex; flex-direction: column; gap: 28px; }
+  .solution-point {
+    display: flex; gap: 20px; align-items: flex-start;
+    padding: 24px; border-radius: 16px;
+    border: 1px solid transparent;
+    transition: border-color .3s, background .3s;
+  }
+  .solution-point:hover {
+    border-color: var(--border);
+    background: var(--glass);
+  }
+  .sp-icon {
+    width: 48px; height: 48px; flex-shrink: 0;
+    border-radius: 14px;
+    background: rgba(201,169,110,.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    border: 1px solid rgba(201,169,110,.15);
+  }
+  .sp-title { font-size: 1rem; font-weight: 600; color: var(--cream); margin-bottom: 4px; }
+  .sp-desc  { font-size: 14px; color: var(--muted); }
+
+  /* ── SCIENCE BAR ─────────────────────────────────────── */
+  .science-bar {
+    background: rgba(201,169,110,.06);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 40px;
+    margin-top: 80px;
+    display: flex; align-items: center; gap: 32px;
+    position: relative; z-index: 2;
+  }
+  .science-icon { font-size: 3rem; flex-shrink: 0; }
+  .science-text { font-size: 15px; color: var(--muted); line-height: 1.6; }
+  .science-text strong { color: var(--cream); display: block; font-size: 17px; margin-bottom: 6px; }
+  @media(max-width:600px) { .science-bar { flex-direction: column; padding: 24px; } }
+
+  /* ── BENEFITS ────────────────────────────────────────── */
+  #benefits { position: relative; z-index: 2; }
+
+  .benefits-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+    gap: 20px; margin-top: 64px;
+  }
+  .benefit-card {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 28px;
+    position: relative; overflow: hidden;
+    transition: transform .3s, border-color .3s, box-shadow .3s;
+  }
+  .benefit-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(201,169,110,.35);
+    box-shadow: 0 24px 60px rgba(0,0,0,.4), 0 0 0 1px rgba(201,169,110,.1);
+  }
+  .benefit-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .benefit-card:hover::after { opacity: 1; }
+
+  .benefit-emoji { font-size: 2.4rem; display: block; margin-bottom: 16px; }
+  .benefit-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--cream); margin-bottom: 8px;
+  }
+  .benefit-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ── REVIEWS ─────────────────────────────────────────── */
+  #reviews { position: relative; z-index: 2; }
+
+  .reviews-header { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+  .rating-big { display: flex; align-items: center; gap: 16px; }
+  .rating-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem; font-weight: 900; color: var(--cream); line-height: 1;
+  }
+  .rating-details { display: flex; flex-direction: column; gap: 4px; }
+  .stars-row { display: flex; gap: 3px; }
+  .star { color: var(--gold); font-size: 18px; }
+  .rating-count { font-size: 13px; color: var(--muted); }
+
+  .reviews-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+    gap: 20px; margin-top: 48px;
+  }
+  .review-card {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    transition: transform .3s, border-color .3s;
+    position: relative;
+  }
+  .review-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(201,169,110,.3);
+  }
+  .review-quote {
+    font-size: 2.5rem; line-height: 1; color: var(--gold);
+    font-family: 'Playfair Display', serif;
+    opacity: .5; margin-bottom: 12px;
+  }
+  .review-text {
+    font-size: 15px; color: var(--cream); line-height: 1.7;
+    font-style: italic; margin-bottom: 24px;
+  }
+  .review-footer { display: flex; align-items: center; gap: 12px; }
+  .review-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    color: white; flex-shrink: 0;
+  }
+  .review-name { font-size: 14px; font-weight: 600; color: var(--cream); }
+  .review-meta { font-size: 12px; color: var(--muted); }
+  .review-stars { display: flex; gap: 2px; margin-bottom: 4px; }
+  .review-star { color: var(--gold); font-size: 12px; }
+
+  .review-verified {
+    position: absolute; top: 20px; right: 20px;
+    font-size: 11px; font-weight: 600; letter-spacing: .06em;
+    color: #4ade80; background: rgba(74,222,128,.1);
+    border: 1px solid rgba(74,222,128,.2);
+    padding: 3px 10px; border-radius: 100px;
+  }
+
+  /* ── HOW IT WORKS ────────────────────────────────────── */
+  #how { position: relative; z-index: 2; }
+
+  .steps {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 0; margin-top: 64px;
+    position: relative;
+  }
+  @media(max-width:680px) {
+    .steps { grid-template-columns: 1fr; }
+    .step-connector { display: none; }
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute; top: 52px; left: calc(33% - 0px); right: calc(33% - 0px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), var(--gold), var(--border), transparent);
+  }
+  @media(max-width:680px){ .steps::before { display: none; } }
+
+  .step {
+    text-align: center; padding: 0 32px;
+    position: relative;
+  }
+  .step-num {
+    width: 104px; height: 104px; border-radius: 50%;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 28px;
+    position: relative; z-index: 1;
+    font-size: 2.4rem;
+    transition: border-color .3s, box-shadow .3s, transform .3s;
+    box-shadow: 0 0 0 8px var(--navy);
+  }
+  .step:hover .step-num {
+    border-color: rgba(201,169,110,.5);
+    box-shadow: 0 0 0 8px var(--navy), 0 0 40px rgba(201,169,110,.15);
+    transform: scale(1.08);
+  }
+  .step-label {
+    font-size: 11px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 10px;
+  }
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; font-weight: 700; color: var(--cream);
+    margin-bottom: 10px;
+  }
+  .step-desc { font-size: 14px; color: var(--muted); }
+
+  /* ── OFFER ───────────────────────────────────────────── */
+  #offer {
+    position: relative; z-index: 2;
+    background: linear-gradient(180deg, transparent 0%, rgba(201,169,110,.04) 50%, transparent 100%);
+  }
+
+  .offer-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 64px;
+    text-align: center;
+    position: relative; overflow: hidden;
+    box-shadow: var(--glow);
+  }
+  @media(max-width:600px){ .offer-box { padding: 40px 24px; } }
+
+  .offer-box::before {
+    content: '';
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 60%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .offer-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(239,68,68,.12);
+    border: 1px solid rgba(239,68,68,.25);
+    color: #f87171;
+    font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 100px;
+    margin-bottom: 24px;
+  }
+  .badge-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #f87171;
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+  .offer-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 900; color: var(--cream); margin-bottom: 12px;
+  }
+  .offer-title em { color: var(--gold); font-style: italic; }
+
+  .offer-sub { font-size: 17px; color: var(--muted); max-width: 500px; margin: 0 auto 44px; }
+
+  .offer-grid {
+    display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 44px;
+  }
+  .offer-plan {
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 32px;
+    min-width: 200px; text-align: center;
+    cursor: none;
+    transition: border-color .3s, background .3s, transform .3s;
+    position: relative;
+  }
+  .offer-plan:hover { background: rgba(255,255,255,.07); transform: translateY(-4px); }
+  .offer-plan.featured {
+    border-color: rgba(201,169,110,.5);
+    background: rgba(201,169,110,.06);
+  }
+  .offer-plan.featured:hover { transform: translateY(-4px) scale(1.02); }
+  .plan-best {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: var(--gold); color: var(--navy);
+    padding: 3px 14px; border-radius: 100px;
+    white-space: nowrap;
+  }
+  .plan-name { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .plan-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem; font-weight: 900; color: var(--cream);
+  }
+  .plan-price sup { font-size: 1.2rem; }
+  .plan-price sub { font-size: .9rem; color: var(--muted); font-weight: 400; }
+  .plan-original { font-size: 13px; color: var(--muted); text-decoration: line-through; margin-bottom: 4px; }
+  .plan-saving {
+    font-size: 12px; font-weight: 600; color: #4ade80;
+    background: rgba(74,222,128,.1); border-radius: 100px;
+    padding: 2px 10px; margin-top: 6px; display: inline-block;
+  }
+  .plan-desc { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+  .offer-guarantees {
+    display: flex; align-items: center; justify-content: center;
+    gap: 32px; flex-wrap: wrap; margin-top: 32px;
+  }
+  .guarantee {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--muted);
+  }
+  .guarantee svg { color: var(--gold); flex-shrink: 0; }
+
+  /* ── FAQ ─────────────────────────────────────────────── */
+  #faq { position: relative; z-index: 2; }
+
+  .faq-list { margin-top: 64px; display: flex; flex-direction: column; gap: 12px; }
+  .faq-item {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color .3s;
+  }
+  .faq-item:hover { border-color: rgba(201,169,110,.3); }
+  .faq-item.open { border-color: rgba(201,169,110,.3); }
+
+  .faq-q {
+    width: 100%; background: none; border: none; cursor: none;
+    padding: 24px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 600; color: var(--cream);
+    transition: color .2s;
+  }
+  .faq-q:hover { color: var(--gold); }
+  .faq-icon {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(201,169,110,.1); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 16px;
+    transition: transform .3s, background .3s;
+  }
+  .faq-item.open .faq-icon { transform: rotate(45deg); background: rgba(201,169,110,.2); }
+  .faq-a {
+    max-height: 0; overflow: hidden;
+    transition: max-height .4s ease, padding .3s;
+    font-size: 15px; color: var(--muted); line-height: 1.7;
+    padding: 0 28px;
+  }
+  .faq-item.open .faq-a { max-height: 200px; padding: 0 28px 24px; }
+
+  /* ── FINAL CTA ───────────────────────────────────────── */
+  #final-cta {
+    position: relative; z-index: 2;
+    text-align: center; padding: 140px 0 80px;
+  }
+  .final-cta-glow {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(201,169,110,.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  #final-cta h2 { margin-bottom: 16px; }
+  #final-cta .subtitle { margin: 0 auto 44px; text-align: center; }
+
+  /* ── FOOTER ──────────────────────────────────────────── */
+  footer {
+    position: relative; z-index: 2;
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+  }
+  .footer-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 20px;
+  }
+  .footer-copy { font-size: 13px; color: var(--muted); }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color .2s; }
+  .footer-links a:hover { color: var(--cream); }
+
+  /* ── SLEEP PROGRESS BAR ──────────────────────────────── */
+  .sleep-progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 200;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    transform-origin: left; transform: scaleX(0);
+    transition: transform .1s;
+  }
+
+  /* ── RESPONSIVE ──────────────────────────────────────── */
+  @media(max-width:768px) {
+    .section { padding: 80px 0; }
+    .hero-headline { font-size: 3rem; }
+    .offer-box { padding: 40px 20px; }
+    .problem-card { padding: 32px 24px; }
+    .step { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PROGRESS BAR -->
+<div class="sleep-progress" id="progressBar"></div>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor">
+  <div class="cursor__dot"></div>
+  <div class="cursor__ring"></div>
+</div>
+
+<!-- STARS -->
+<canvas id="stars"></canvas>
+
+<!-- ══ HEADER ══════════════════════════════════════════ -->
+<header id="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="#" class="logo">Rest<span>lio</span></a>
+      <a href="#offer" class="header-cta">Shop Now</a>
+    </div>
+  </div>
+</header>
+
+<!-- ══ HERO ════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-moon"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow reveal">
+        <span class="hero-line"></span>
+        <span class="hero-eyebrow-text">Sleep Science, Finally Applied</span>
+      </div>
+      <h1 class="hero-headline reveal reveal-delay-1">
+        Turn off your mind.
+        <em>Sleep deeper.</em>
+      </h1>
+      <p class="hero-sub reveal reveal-delay-2">
+        Designed for people who <strong>can't stop thinking at night.</strong>
+        Experience calm, deep sleep — without pills, without frustration.
+      </p>
+      <div class="hero-actions reveal reveal-delay-3">
+        <a href="#offer" class="btn-primary">
+          Get Better Sleep Tonight
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#how" class="btn-ghost">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+          How it works
+        </a>
+      </div>
+      <div class="hero-trust reveal reveal-delay-4">
+        <div class="hero-trust-avatars">
+          <div class="av av-1">SM</div>
+          <div class="av av-2">KP</div>
+          <div class="av av-3">JD</div>
+          <div class="av av-4">AL</div>
+          <div class="av av-5">MR</div>
+        </div>
+        <div class="hero-trust-text">
+          <strong>4,800+ people sleep better</strong>
+          ★★★★★ &nbsp;4.9 / 5 from 1,200 reviews
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF BAR -->
+<div class="proof-bar">
+  <div class="container">
+    <div class="proof-bar-inner">
+      <div class="proof-item">
+        <span class="proof-icon">🌙</span>
+        <span><strong>4,800+</strong> happy sleepers</span>
+      </div>
+      <div class="proof-item">
+        <span class="proof-icon">⭐</span>
+        <span><strong>4.9/5</strong> average rating</span>
+      </div>
+      <div class="proof-item">
+        <span class="proof-icon">🛡️</span>
+        <span><strong>30-night</strong> risk-free trial</span>
+      </div>
+      <div class="proof-item">
+        <span class="proof-icon">🚚</span>
+        <span><strong>Free shipping</strong> on all orders</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROBLEM ══════════════════════════════════════════ -->
+<section id="problem" class="section">
+  <div class="container">
+    <div class="reveal">
+      <span class="tag">Sound familiar?</span>
+      <h2>Your body is tired.<br><em>Your mind isn't.</em></h2>
+      <p class="subtitle">You're not broken. Millions of people lie in bed exhausted — but completely unable to switch off. You're not alone in this.</p>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-card reveal reveal-delay-1">
+        <span class="problem-number">01</span>
+        <span class="problem-icon">📱</span>
+        <div class="problem-title">The Endless Scroll</div>
+        <p class="problem-desc">You pick up your phone "just for a minute." Two hours later, you're watching videos about topics you don't even care about — and it's 2am.</p>
+      </div>
+      <div class="problem-card reveal reveal-delay-2">
+        <span class="problem-number">02</span>
+        <span class="problem-icon">🌀</span>
+        <div class="problem-title">Overthinking at Night</div>
+        <p class="problem-desc">The moment your head hits the pillow, your brain decides it's the perfect time to replay every conversation, plan tomorrow, and invent new worries.</p>
+      </div>
+      <div class="problem-card reveal reveal-delay-3">
+        <span class="problem-number">03</span>
+        <span class="problem-icon">😮‍💨</span>
+        <div class="problem-title">Waking Up Exhausted</div>
+        <p class="problem-desc">Eight hours in bed, but you feel worse than when you lay down. Groggy. Foggy. Running on caffeine just to feel human again.</p>
+      </div>
+    </div>
+
+    <p class="problem-cta-line reveal">
+      There's a reason this happens — and once you understand it, <br>
+      <strong>the fix is surprisingly simple.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- ══ SOLUTION ═════════════════════════════════════════ -->
+<section id="solution" class="section">
+  <div class="container">
+    <div class="reveal" style="text-align:center;margin-bottom:64px">
+      <span class="tag">The Science</span>
+      <h2>Meet the <em>Restlio</em> Weighted Pillow</h2>
+      <p class="subtitle" style="margin:16px auto 0">Why does it work? Deep pressure stimulation triggers your parasympathetic nervous system — the one responsible for calm, rest, and recovery.</p>
+    </div>
+
+    <div class="solution-layout">
+      <!-- PILLOW VISUAL -->
+      <div class="pillow-stage reveal">
+        <div class="pillow-glow"></div>
+        <div style="position:relative">
+          <div class="pillow-tags left">
+            <div class="ptag"><div class="dot"></div> Deep pressure</div>
+            <div class="ptag"><div class="dot"></div> Calms nervous system</div>
+            <div class="ptag"><div class="dot"></div> Premium fill</div>
+          </div>
+          <div class="pillow">
+            <span class="pillow-label">Restlio</span>
+            <div class="pillow-badge">
+              <span>BEST<br>SELLER</span>
+            </div>
+          </div>
+          <div class="pillow-tags right">
+            <div class="ptag">Hypoallergenic <div class="dot"></div></div>
+            <div class="ptag">Washable <div class="dot"></div></div>
+            <div class="ptag">Certified safe <div class="dot"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POINTS -->
+      <div class="solution-points">
+        <div class="solution-point reveal">
+          <div class="sp-icon">🧠</div>
+          <div>
+            <div class="sp-title">Calms Your Nervous System</div>
+            <p class="sp-desc">Gentle, even pressure signals to your brain that you're safe. Cortisol drops. Serotonin rises. Your mind finally lets go.</p>
+          </div>
+        </div>
+        <div class="solution-point reveal reveal-delay-1">
+          <div class="sp-icon">🫂</div>
+          <div>
+            <div class="sp-title">The Feeling of Being Held</div>
+            <p class="sp-desc">Like a warm hug for your whole body. That grounded, secure sensation isn't just comforting — it's scientifically proven to reduce anxiety.</p>
+          </div>
+        </div>
+        <div class="solution-point reveal reveal-delay-2">
+          <div class="sp-icon">⚡</div>
+          <div>
+            <div class="sp-title">Works From the First Night</div>
+            <p class="sp-desc">No adjustment period. No habit-building. Just lie down, feel the pressure, and let your body do the rest. Most users notice a difference immediately.</p>
+          </div>
+        </div>
+        <div class="solution-point reveal reveal-delay-3">
+          <div class="sp-icon">💊</div>
+          <div>
+            <div class="sp-title">Zero Pills. Zero Side Effects.</div>
+            <p class="sp-desc">No dependency, no grogginess, no morning fog. Just natural, deep sleep — the way your body was designed to rest.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="science-bar reveal">
+      <span class="science-icon">🔬</span>
+      <div class="science-text">
+        <strong>Backed by Deep Pressure Stimulation research</strong>
+        Studies show weighted pressure increases serotonin by up to 28%, reduces cortisol by 31%, and cuts time-to-sleep in half. This isn't a trend — it's physiology.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ BENEFITS ══════════════════════════════════════════ -->
+<section id="benefits" class="section">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <span class="tag">What You'll Feel</span>
+      <h2>Not features. <em>Results.</em></h2>
+      <p class="subtitle" style="margin:16px auto 0">We don't talk about thread count or fill weight. We talk about what changes in your life when you finally sleep.</p>
+    </div>
+
+    <div class="benefits-grid">
+      <div class="benefit-card reveal">
+        <span class="benefit-emoji">💤</span>
+        <div class="benefit-title">Fall Asleep Faster</div>
+        <p class="benefit-desc">Stop staring at the ceiling. The pressure helps your mind transition from "on" to "off" in minutes, not hours.</p>
+      </div>
+      <div class="benefit-card reveal reveal-delay-1">
+        <span class="benefit-emoji">🌿</span>
+        <div class="benefit-title">Reduce Stress & Anxiety</div>
+        <p class="benefit-desc">Wake up lighter. The daily pressure release means you carry less tension into tomorrow.</p>
+      </div>
+      <div class="benefit-card reveal reveal-delay-2">
+        <span class="benefit-emoji">🌱</span>
+        <div class="benefit-title">Feel Grounded Instantly</div>
+        <p class="benefit-desc">The moment you lay on it, something shifts. That scattered, restless feeling gives way to calm — immediately.</p>
+      </div>
+      <div class="benefit-card reveal reveal-delay-3">
+        <span class="benefit-emoji">☀️</span>
+        <div class="benefit-title">Wake Up Refreshed</div>
+        <p class="benefit-desc">Deeper sleep means better recovery. More energy, sharper focus, and actually wanting to get out of bed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ REVIEWS ═══════════════════════════════════════════ -->
+<section id="reviews" class="section">
+  <div class="container">
+    <div class="reviews-header reveal">
+      <div>
+        <span class="tag">Real People, Real Results</span>
+        <h2>They couldn't sleep either.<br><em>Until they tried this.</em></h2>
+      </div>
+      <div class="rating-big">
+        <div class="rating-number">4.9</div>
+        <div class="rating-details">
+          <div class="stars-row">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <div class="rating-count">Based on 1,247 reviews</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reviews-grid">
+      <div class="review-card reveal">
+        <span class="review-verified">✓ Verified</span>
+        <div class="review-quote">"</div>
+        <p class="review-text">First night I used it, I slept like a baby. I've been struggling with insomnia for three years and nothing has worked like this. I don't know how it works, I just know I never want to sleep without it again.</p>
+        <div class="review-footer">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#667eea,#764ba2)">SK</div>
+          <div>
+            <div class="review-stars">
+              <span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span>
+            </div>
+            <div class="review-name">Sarah K.</div>
+            <div class="review-meta">Teacher · Used for 3 months</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card reveal reveal-delay-1">
+        <span class="review-verified">✓ Verified</span>
+        <div class="review-quote">"</div>
+        <p class="review-text">I was skeptical — I thought a pillow couldn't possibly help my anxiety-brain. But I literally felt the difference the second I laid down. It's like someone turned the volume down on my thoughts.</p>
+        <div class="review-footer">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#f093fb,#f5576c)">MJ</div>
+          <div>
+            <div class="review-stars">
+              <span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span>
+            </div>
+            <div class="review-name">Marek J.</div>
+            <div class="review-meta">Developer · Used for 6 weeks</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card reveal reveal-delay-2">
+        <span class="review-verified">✓ Verified</span>
+        <div class="review-quote">"</div>
+        <p class="review-text">Bought one for myself, then immediately ordered two more — one for my husband and one for my daughter. We're all better sleepers now. This is the best thing I've bought all year. No contest.</p>
+        <div class="review-footer">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">LV</div>
+          <div>
+            <div class="review-stars">
+              <span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span>
+            </div>
+            <div class="review-name">Lucia V.</div>
+            <div class="review-meta">Nurse · Used for 4 months</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ══════════════════════════════════════ -->
+<section id="how" class="section">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <span class="tag">Simple as breathing</span>
+      <h2>Three steps to <em>deep sleep</em></h2>
+      <p class="subtitle" style="margin:16px auto 0">No routine to build. No habit to form. Just the pillow — and your body doing what it was always meant to do.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">🛏️</div>
+        <div class="step-label">Step 01</div>
+        <div class="step-title">Lie Down</div>
+        <p class="step-desc">Place the pillow wherever feels right — under your head, against your chest, or hugged close. There's no wrong way.</p>
+      </div>
+      <div class="step reveal reveal-delay-1">
+        <div class="step-num">🤲</div>
+        <div class="step-label">Step 02</div>
+        <div class="step-title">Feel Gentle Pressure</div>
+        <p class="step-desc">The weight distributes evenly, sending deep pressure signals to your nervous system. You'll notice the shift within moments.</p>
+      </div>
+      <div class="step reveal reveal-delay-2">
+        <div class="step-num">😴</div>
+        <div class="step-label">Step 03</div>
+        <div class="step-title">Relax Instantly</div>
+        <p class="step-desc">Your body takes over. Breathing slows. Thoughts quiet. You drift into the kind of deep, restorative sleep you've been missing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ OFFER ═════════════════════════════════════════════ -->
+<section id="offer" class="section">
+  <div class="container">
+    <div class="offer-box reveal">
+      <div class="offer-badge">
+        <span class="badge-dot"></span>
+        Only 47 left in stock
+      </div>
+      <h2 class="offer-title">Try it risk-free<br>for <em>30 nights.</em></h2>
+      <p class="offer-sub">If you don't sleep better, you don't pay. Zero questions. Zero hassle. Zero risk. Just better sleep — or your money back.</p>
+
+      <div class="offer-grid">
+        <div class="offer-plan">
+          <div class="plan-name">Single Pillow</div>
+          <div class="plan-original">€79</div>
+          <div class="plan-price"><sup>€</sup>63<sub>/pillow</sub></div>
+          <div class="plan-saving">Save 20%</div>
+          <div class="plan-desc">Perfect for trying it out</div>
+        </div>
+        <div class="offer-plan featured">
+          <div class="plan-best">Most Popular</div>
+          <div class="plan-name">Bundle — 2 Pillows</div>
+          <div class="plan-original">€158</div>
+          <div class="plan-price"><sup>€</sup>109<sub>/bundle</sub></div>
+          <div class="plan-saving">Save 31% · Free gift</div>
+          <div class="plan-desc">For you and someone you love</div>
+        </div>
+        <div class="offer-plan">
+          <div class="plan-name">Family — 3 Pillows</div>
+          <div class="plan-original">€237</div>
+          <div class="plan-price"><sup>€</sup>149<sub>/bundle</sub></div>
+          <div class="plan-saving">Save 37%</div>
+          <div class="plan-desc">Best value for families</div>
+        </div>
+      </div>
+
+      <a href="#" class="btn-primary" style="font-size:17px;padding:20px 48px;margin-bottom:8px">
+        Shop Now — Choose Your Bundle
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px">Free shipping · 30-night guarantee · Secure checkout</p>
+
+      <div class="offer-guarantees">
+        <div class="guarantee">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          30-night guarantee
+        </div>
+        <div class="guarantee">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Free shipping & returns
+        </div>
+        <div class="guarantee">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Secure payment
+        </div>
+        <div class="guarantee">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Satisfaction guaranteed
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ═══════════════════════════════════════════════ -->
+<section id="faq" class="section">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <span class="tag">Got Questions?</span>
+      <h2>We have <em>answers.</em></h2>
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Is it safe to sleep with a weighted pillow?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Absolutely. Restlio pillows are designed for adults and are completely safe for all-night use. The weight is distributed evenly and designed to feel comforting, never restrictive. Our pillows meet all EU safety standards and are certified hypoallergenic.</div>
+      </div>
+      <div class="faq-item reveal reveal-delay-1">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          How heavy should my pillow be?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Our pillow is carefully engineered at the optimal weight for sleep — heavy enough to trigger deep pressure stimulation, light enough to sleep comfortably all night. Unlike weighted blankets, you don't need to calculate 10% of your body weight. One size works beautifully for everyone.</div>
+      </div>
+      <div class="faq-item reveal reveal-delay-2">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          How fast will it arrive?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Orders are dispatched within 24 hours. Standard delivery takes 3–5 business days. Express 1–2 day shipping is available at checkout. We ship across all of Europe, with free shipping on every order — no minimum required.</div>
+      </div>
+      <div class="faq-item reveal reveal-delay-3">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          What if it doesn't work for me?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Then you pay nothing. Our 30-night guarantee is exactly what it sounds like: try it for a full month, sleep on it every night, and if you're not genuinely sleeping better, contact us and we'll refund you completely — no questions, no hoops to jump through.</div>
+      </div>
+      <div class="faq-item reveal reveal-delay-4">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Can I wash the pillow?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Yes. The removable cover is fully machine washable. We recommend washing at 30°C with a gentle cycle. The inner pillow can be spot-cleaned. We also include a spare cover in all bundle orders.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FINAL CTA ═════════════════════════════════════════ -->
+<section id="final-cta">
+  <div class="final-cta-glow"></div>
+  <div class="container">
+    <div class="reveal">
+      <span class="tag">Tonight could be different</span>
+      <h2>You've been tired long enough.</h2>
+      <p class="subtitle">The only thing standing between you and the best sleep of your life is one decision. Make it risk-free.</p>
+      <a href="#offer" class="btn-primary" style="font-size:17px;padding:20px 48px">
+        Get Better Sleep Tonight
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ════════════════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="logo" style="margin-bottom:6px">Rest<span style="color:var(--gold)">lio</span></div>
+        <div class="footer-copy">© 2025 Restlio. All rights reserved.</div>
+      </div>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms</a>
+        <a href="#">Returns</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══ SCRIPTS ════════════════════════════════════════════ -->
+<script>
+/* ── CURSOR ─────────────────────────────────────────────── */
+const cursor = document.getElementById('cursor');
+const dot    = cursor.querySelector('.cursor__dot');
+const ring   = cursor.querySelector('.cursor__ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  dot.style.transform = `translate(${mx}px,${my}px) translate(-50%,-50%)`;
+});
+
+(function animRing(){
+  rx += (mx - rx) * .12;
+  ry += (my - ry) * .12;
+  ring.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`;
+  requestAnimationFrame(animRing);
+})();
+
+/* ── STARS ──────────────────────────────────────────────── */
+(function(){
+  const canvas = document.getElementById('stars');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for(let i = 0; i < 180; i++){
+    stars.push({
+      x: Math.random(),
+      y: Math.random(),
+      r: Math.random() * 1.2 + .2,
+      o: Math.random() * .6 + .1,
+      s: Math.random() * .003 + .001,
+      p: Math.random() * Math.PI * 2
+    });
+  }
+
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    stars.forEach(s => {
+      const o = s.o * (.5 + .5 * Math.sin(t * s.s * 1000 + s.p));
+      ctx.beginPath();
+      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(201,169,110,${o})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* ── SCROLL HEADER ──────────────────────────────────────── */
+const header      = document.getElementById('header');
+const progressBar = document.getElementById('progressBar');
+
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const total    = document.body.scrollHeight - window.innerHeight;
+  const pct      = scrolled / total;
+
+  header.classList.toggle('scrolled', scrolled > 60);
+  progressBar.style.transform = `scaleX(${pct})`;
+});
+
+/* ── REVEAL ON SCROLL ───────────────────────────────────── */
+const reveals = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      e.target.classList.add('visible');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: .12 });
+reveals.forEach(el => io.observe(el));
+
+/* ── FAQ ────────────────────────────────────────────────── */
+function toggleFaq(btn){
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
+}
+
+/* ── SMOOTH SCROLL FOR ANCHORS ──────────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target){ e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+</body>
+</html>
+
+  </style>
+
+  <!-- 2. SEM SKOPÍRUJ ÚPLNE VŠETKO, ČO MÁ CLAUDE V ORIGINÁLE MEDZI ZNAČKAMI <body> a </body> -->
+  <!-- (Nezabudni zobrať aj tie <script> tagy, ktoré sú na úplnom konci pred </body>) -->
+
+</div>
+
+{% schema %}
+{
+  "name": "Restlio - Complete Page",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Restlio - Complete Page"
+    }
+  ]
+}
+{% endschema %}
