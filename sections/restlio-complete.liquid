@@ -1009,16 +1009,15 @@
             <div class="ptag"><div class="dot"></div> Premium fill</div>
           </div>
           <div class="pillow">
-  {% if section.settings.pillow_img != blank %}
-    <img src="{{ section.settings.pillow_img | image_url: width: 800 }}" alt="Restlio Pillow" style="width: 100%; height: auto; display: block;">
-  {% else %}
-    <span class="pillow-label">Restlio</span>
-  {% endif %}
-
-  <!-- Presunuli sme toto SEM, aby to bolo VNÚTRI vankúša -->
-  <div class="pillow-badge">
-    <span>BEST<br>SELLER</span>
-  </div>
+          {% if section.settings.pillow_img != blank %}
+            <img src="{{ section.settings.pillow_img | image_url: width: 800 }}" alt="Restlio Pillow" style="width: 100%; height: auto; display: block;">
+          {% else %}
+            <span class="pillow-label">Restlio</span>
+          {% endif %}
+          
+          <div class="pillow-badge">
+            <span>BEST<br>SELLER</span>
+           </div>
           <div class="pillow-tags right">
             <div class="ptag">Hypoallergenic <div class="dot"></div></div>
             <div class="ptag">Washable <div class="dot"></div></div>
