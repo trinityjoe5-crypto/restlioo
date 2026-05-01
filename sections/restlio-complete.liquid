@@ -1414,11 +1414,22 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
 {% schema %}
 {
-  "name": "Restlio - Complete Page",
-  "settings": [],
+  "name": "Restlio Complete",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo_img",
+      "label": "Tvoje Logo"
+    },
+    {
+      "type": "product",
+      "id": "main_product",
+      "label": "Hlavný produkt (tlačidlo)"
+    }
+  ],
   "presets": [
     {
-      "name": "Restlio - Complete Page"
+      "name": "Restlio Complete"
     }
   ]
 }
