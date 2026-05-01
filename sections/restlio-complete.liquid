@@ -3,8 +3,53 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <div id="RestlioMaster">
-    
+    <nav class="restlio-nav">
+  <div class="container">
+    <div class="nav-content">
+      <div class="logo">
+        {% if section.settings.logo_img != blank %}
+          <img src="{{ section.settings.logo_img | image_url: width: 400 }}" alt="Restlio Logo">
+        {% else %}
+          Rest<span>lio</span>
+        {% endif %}
+      </div>
+      <div class="nav-cta">
+        <a href="{{ section.settings.main_product.url | default: '#' }}" class="btn-small">Shop Now</a>
+      </div>
+    </div>
+  </div>
+</nav>
 <style>
+  .restlio-nav {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--navy);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--cream);
+}
+.logo span { color: var(--gold); }
+.logo img { height: 40px; width: auto; display: block; }
+.btn-small {
+  padding: 10px 20px;
+  background: var(--gold);
+  color: var(--navy);
+  text-decoration: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 14px;
+}
   /* ── RESET & BASE ─────────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
