@@ -8,7 +8,9 @@
     <div class="nav-content">
       <div class="logo">
         {% if section.settings.logo_img != blank %}
-          <img src="{{ section.settings.logo_img | image_url: width: 400 }}" alt="Restlio Logo">
+          <img src="{{ section.settings.logo_img | image_url: width: 600 }}" 
+          style="height: 70px !important; width: auto !important; max-height: none !important; display: block !important;" 
+          alt="Logo">
         {% else %}
           Rest<span>lio</span>
         {% endif %}
